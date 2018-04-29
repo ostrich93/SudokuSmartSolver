@@ -1,0 +1,97 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9BDD2748-8BE2-48C0-947F-C363E2B7D9F3}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>SudokuSmartSolver</RootNamespace>
+    <AssemblyName>SudokuSmartSolver</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=10.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.ValueTuple, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.4.0\lib\net461\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Board.cs" />
+    <Compile Include="CellGroupCertifier.cs" />
+    <Compile Include="CellManipulations.cs" />
+    <Compile Include="PuzzleCertifier.cs" />
+    <Compile Include="Agent.cs" />
+    <Compile Include="CellAttempts.cs" />
+    <Compile Include="CellGroup.cs" />
+    <Compile Include="CellPossAssociation.cs" />
+    <Compile Include="contexts\Context.cs" />
+    <Compile Include="contexts\HiddenTwinExclusionContext.cs" />
+    <Compile Include="contexts\NakedTwinExclusionContext.cs" />
+    <Compile Include="contexts\OnlyChoiceContext.cs" />
+    <Compile Include="contexts\SinglePossibilityContext.cs" />
+    <Compile Include="contexts\SubgroupExclusionContext.cs" />
+    <Compile Include="DiscardedValuesTable.cs" />
+    <Compile Include="FrequencyCounter.cs" />
+    <Compile Include="Pair.cs" />
+    <Compile Include="Percepts.cs" />
+    <Compile Include="QuantityType.cs" />
+    <Compile Include="SGUnitIntersectKey.cs" />
+    <Compile Include="ClueSerializationUtility.cs" />
+    <Compile Include="strategies\HiddenTwinExclusionStrategy.cs" />
+    <Compile Include="strategies\NakedTwinExclusionStrategy.cs" />
+    <Compile Include="strategies\OnlyChoiceStrategy.cs" />
+    <Compile Include="strategies\SinglePossibilityStrategy.cs" />
+    <Compile Include="strategies\Strategy.cs" />
+    <Compile Include="strategies\SubgroupExclusion.cs" />
+    <Compile Include="SudokuCell.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SudokuCellExtensions.cs" />
+    <Compile Include="SudokuPuzzle.cs" />
+    <Compile Include="ThreeValueDictionary.cs" />
+    <Compile Include="Triplet.cs" />
+    <Compile Include="TwinMapper.cs" />
+    <Compile Include="TwoKeyDictionary.cs" />
+    <Compile Include="TwoValueDictionary.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="clues\sudoA.json" />
+    <None Include="clues\sudoB.json" />
+    <None Include="clues\sudoC.json" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>
