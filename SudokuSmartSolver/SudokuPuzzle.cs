@@ -200,7 +200,11 @@ namespace SudokuPuzzleSolver
         public void ClearPuzzle()
         {
             discardedValuesTable.Clear();
-            cellBoard = null;
+            cellBoard = new Board();
+            rowCollection = new CellGroup[9];
+            colCollection = new CellGroup[9];
+            sgCollection = new CellGroup[9];
+            isSolved = false;
             //domainFreqCounter.Clear();
         }
 

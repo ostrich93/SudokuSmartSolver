@@ -22,14 +22,15 @@ namespace SudokuPuzzleSolver.strategies
         {
             foreach (SGUnitIntersectKey sgKey in paramets ?? new List<SGUnitIntersectKey>())
             {
-                CellGroup targetSG = sudoku.sgCollection[sgKey.subgridIndex - 1];
-                var exclusionTargets = targetSG.GetOpenMembers().Select(es => es).Where(ex => ex.Possibilities.Any(t => sgKey.intersectedUnitValues.Contains(t)) && !sgKey.intersectCells.Contains(ex));
+                CellGroup targetSG = sgKey.subgrid;
+                List<SudokuCell> exclusionTargets = sgKey.elimCells;
                 if (exclusionTargets != null && exclusionTargets.Count() > 0)
                 {
                     foreach(SudokuCell exTarget in exclusionTargets)
                     {
-                        List<int> targetDisValues = exTarget.Possibilities.Intersect(sgKey.intersectedUnitValues).ToList();
-                        sudoku.discardedValuesTable.AddDiscardedValues(exTarget, targetDisValues);
+                        sudoku.discardedValuesTable.AddDiscardedValue(exTarget, sgKey.intersectValue);
+                        Console.WriteLine("{0} discarded from {1}'s possibilities", sgKey.intersectValue, exTarget);
+                        Debug.WriteLine("{0} discarded from {1}'s possibilities", sgKey.intersectValue, exTarget);
                     }
                 }
             }

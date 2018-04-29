@@ -34,34 +34,29 @@ namespace SudokuPuzzleSolver
 
         private OnlyChoiceStrategy onlyChoiceStrategy = new OnlyChoiceStrategy();
         private SinglePossibilityStrategy singlePossibilityStrategy = new SinglePossibilityStrategy();
-        //private SubgroupExclusionStrategy subgroupExclusionStrategy = new SubgroupExclusionStrategy();
-        private HiddenTwinExclusionStrategy hiddenTwinExclusionStrategy = new HiddenTwinExclusionStrategy();
+        private SubgroupExclusionStrategy subgroupExclusionStrategy = new SubgroupExclusionStrategy();
+        //private HiddenTwinExclusionStrategy hiddenTwinExclusionStrategy = new HiddenTwinExclusionStrategy();
         private NakedTwinExclusionStrategy nakedTwinExclusionStrategy = new NakedTwinExclusionStrategy();
 
         private List<int> availableFills = SudokuPuzzle.sudokuDomain;
 
         private OnlyChoiceContext onlyChoiceContext = new OnlyChoiceContext();
         private SinglePossibilityContext singlePossibilityContext = new SinglePossibilityContext();
-        //private SubgroupExclusionContext subgroupExclusionContext = new SubgroupExclusionContext();
+        private SubgroupExclusionContext subgroupExclusionContext = new SubgroupExclusionContext();
         private NakedTwinExclusionContext nakedTwinExclusionContext = new NakedTwinExclusionContext();
-        private HiddenTwinExclusionContext hiddenTwinExclusionContext = new HiddenTwinExclusionContext();
+        //private HiddenTwinExclusionContext hiddenTwinExclusionContext = new HiddenTwinExclusionContext();
 
         private List<SudokuCell> stTemp = new List<SudokuCell>();
         private List<CellGroup> ocTemp = new List<CellGroup>();
-        //private List<SGUnitIntersectKey> sgeTemp = new List<SGUnitIntersectKey>();
-        private Dictionary<CellGroup, List<Pair<SudokuCell, SudokuCell>>> ntTemp = new Dictionary<CellGroup, List<Pair<SudokuCell, SudokuCell>>>();
-        private Dictionary<CellGroup, List<Pair<SudokuCell, SudokuCell>>> htTemp = new Dictionary<CellGroup, List<Pair<SudokuCell, SudokuCell>>>();
+        private List<SGUnitIntersectKey> sgeTemp = new List<SGUnitIntersectKey>();
+        private TwinNodesCollection ntTemp = new TwinNodesCollection();
+        //private Dictionary<CellGroup, List<Pair<SudokuCell, SudokuCell>>> htTemp = new Dictionary<CellGroup, List<Pair<SudokuCell, SudokuCell>>>();
 
         private Percepts thisPercept = Percepts.None;
 
         public PuzzleCertifier certifier = new PuzzleCertifier();
 
-        private List<Percepts> perceptsList = new List<Percepts>();
-        //private Percepts lastPercept { get { if (perceptsList.Count == 0) { return Percepts.None; } return perceptsList.Last(); } }
-        //private Percepts percept = Percepts.None;
-        //private Dictionary<Percepts, int> consecutiveActionsDictionary = new Dictionary<Percepts, int>() { {Percepts.AreSinglePossibilities, 0}, {Percepts.AreOnlyChoice, 0}, {Percepts.SubgroupExclusion, 0}, {Percepts.FindingNakedTwin, 0}, { Percepts.FindingHiddenTwin, 0 } };
         private LiveStatus isAlive;
-        //private readonly int consecutiveLimit = 200;
 
         public Agent()
         {
@@ -85,29 +80,29 @@ namespace SudokuPuzzleSolver
                         Console.WriteLine("No strategy can be executed this round.");
                         Debug.WriteLine("No strategy can be exceuted this round.");
                         break;
-                    case Percepts.AreSinglePossibilities:
-                        singlePossibilityStrategy.AlgorithmInterface(stTemp);
-                        break;
                     case Percepts.AreOnlyChoice:
                         onlyChoiceStrategy.AlgorithmInterface(ocTemp);
                         Console.WriteLine("Only Choice Strategy executed this round");
                         Debug.WriteLine("Only Choice Strategy executed this round.");
                         break;
-                        //case Percepts.SubgroupExclusion:
-                        //    subgroupExclusionStrategy.AlgorithmInterface(sgeTemp);
-                        //Console.WriteLine("Subgroup Exclusion executed this round");
-                        //Debug.WriteLine("Subgroup Exclusion executed this round.");
-                    //    break;
+                    case Percepts.AreSinglePossibilities:
+                        singlePossibilityStrategy.AlgorithmInterface(stTemp);
+                        break;
+                    case Percepts.SubgroupExclusion:
+                        subgroupExclusionStrategy.AlgorithmInterface(sgeTemp);
+                        Console.WriteLine("Subgroup Exclusion executed this round");
+                        Debug.WriteLine("Subgroup Exclusion executed this round.");
+                        break;
                     case Percepts.FindingNakedTwin:
-                        nakedTwinExclusionStrategy.AlgorithmInterface(ntTemp);
+                        nakedTwinExclusionStrategy.AlgorithmInterface(ntTemp); //stuck on infinite loop here. THe issue appears to be that a list of twins are returned BUT none of the twin's neighbors have twin values as possibilities
                         Console.WriteLine("Naked Twin Strategy executed this round");
                         Debug.WriteLine("Naked Twin Strategy executed this round.");
                         break;
-                    case Percepts.FindingHiddenTwin:
-                        hiddenTwinExclusionStrategy.AlgorithmInterface(htTemp);
-                        Console.WriteLine("Hidden Twin Strategy executed this round");
-                        Debug.WriteLine("Hidden Twin Strategy executed this round.");
-                        break;
+                    //case Percepts.FindingHiddenTwin:
+                    //    hiddenTwinExclusionStrategy.AlgorithmInterface(htTemp);
+                    //    Console.WriteLine("Hidden Twin Strategy executed this round");
+                    //    Debug.WriteLine("Hidden Twin Strategy executed this round.");
+                    //    break;
                     default:
                         break;
                 }
@@ -138,30 +133,30 @@ namespace SudokuPuzzleSolver
 
         private Percepts GetPerceptForRound()
         {
-            if (singlePossibilityContext.ContextAlgorithm() == Percepts.AreSinglePossibilities)
-            {
-                bool sc = singlePossibilityContext.GetContext(out stTemp);
-                return Percepts.AreSinglePossibilities;
-            }
             if (onlyChoiceContext.ContextAlgorithm() == Percepts.AreOnlyChoice)
             {
                 bool ot = onlyChoiceContext.GetContext(out ocTemp);
                 return Percepts.AreOnlyChoice;
             }
-            //if (subgroupExclusionContext.ContextAlgorithm() == Percepts.SubgroupExclusion) //bugs are mainly here. Think it might be discarding too many values? That or too broad definition. Might try without it. 
-            //{
-            //    bool sgt = subgroupExclusionContext.GetContext(out sgeTemp);
-            //    return Percepts.SubgroupExclusion;
-            //}
+            if (singlePossibilityContext.ContextAlgorithm() == Percepts.AreSinglePossibilities)
+            {
+                bool sc = singlePossibilityContext.GetContext(out stTemp);
+                return Percepts.AreSinglePossibilities;
+            }
+            if (subgroupExclusionContext.ContextAlgorithm() == Percepts.SubgroupExclusion) //bugs are mainly here. Think it might be discarding too many values? That or too broad definition. Might try without it. 
+            {
+                bool sgt = subgroupExclusionContext.GetContext(out sgeTemp);
+                return Percepts.SubgroupExclusion;
+            }
             if (nakedTwinExclusionContext.ContextAlgorithm() == Percepts.FindingNakedTwin) {
-                bool ntt = nakedTwinExclusionContext.GetContext(out ntTemp);
+                bool ntt = nakedTwinExclusionContext.GetContext(out ntTemp); //bool should be changed so that it doesn't return the percept if none of the neighbors of the twins share any possibility values in the set.
                 return Percepts.FindingNakedTwin;
             }
-            if (hiddenTwinExclusionContext.ContextAlgorithm() == Percepts.FindingHiddenTwin)
-            {
-                bool hnht = hiddenTwinExclusionContext.GetContext(out htTemp);
-                return Percepts.FindingHiddenTwin;
-            }
+            //if (hiddenTwinExclusionContext.ContextAlgorithm() == Percepts.FindingHiddenTwin)
+            //{
+            //    bool hnht = hiddenTwinExclusionContext.GetContext(out htTemp);
+            //    return Percepts.FindingHiddenTwin;
+            //}
             return Percepts.None;
         }
 
@@ -170,7 +165,7 @@ namespace SudokuPuzzleSolver
             thisPercept = Percepts.None;
             //sgeTemp.Clear();
             stTemp.Clear();
-            htTemp.Clear();
+            //htTemp.Clear();
             ntTemp.Clear();
             ocTemp.Clear();
         }

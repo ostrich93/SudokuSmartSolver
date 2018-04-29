@@ -209,6 +209,30 @@ namespace SudokuPuzzleSolver
             return fewestCell;
         }
 
+        public List<SudokuCell> GetNeighborsWithPossibility(int g, UnitType gType)
+        {
+            switch (gType)
+            {
+                case UnitType.row:
+                    var rnps = from rc in rowNeighbors
+                               where !rc.isFilled && rc.Possibilities.Contains(g)
+                               select rc;
+                    return rnps.ToList();
+                case UnitType.column:
+                    var cnps = from cc in columnNeighbors
+                               where !cc.isFilled && cc.Possibilities.Contains(g)
+                               select cc;
+                    return cnps.ToList();
+                case UnitType.subgrid:
+                    var sgnps = from sgc in subgridNeighbors
+                                where !sgc.isFilled && sgc.Possibilities.Contains(g)
+                                select sgc;
+                    return sgnps.ToList();
+                default:
+                    return null;
+            }
+        }
+
         public bool CompareHashSet(HashSet<int> hset)
         {
             List<int> hList = new List<int>(hset);

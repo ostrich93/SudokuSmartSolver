@@ -8,33 +8,22 @@ namespace SudokuPuzzleSolver
 {
     public struct SGUnitIntersectKey
     {
-        public List<SudokuCell> intersectCells;
-        public UnitType intersectType;
-        public int cellGroupIndex;
-        public int subgridIndex;
-        public List<int> intersectedUnitValues;
+        public List<SudokuCell> intersectCells; //cells to not alter
+        public List<SudokuCell> elimCells; //cells to elminate interesectKey from their possiblity lists
+        public CellGroup subgrid; //replace with CellGroup
+        public int intersectValue; //replace with single int value
 
-        public SGUnitIntersectKey(CellGroup cg, List<SudokuCell> intercells, int sgIdx, List<int> intersectingInts)
+        public SGUnitIntersectKey(CellGroup cg, List<SudokuCell> intercells, List<SudokuCell> prohibitCells, int intersectingInt)
         {
             intersectCells = intercells;
-            intersectType = cg.GroupType;
-            intersectedUnitValues = intersectingInts;
-            subgridIndex = sgIdx;
-            cellGroupIndex = cg.Index;
-        }
-
-        public SGUnitIntersectKey(CellGroup cg, List<SudokuCell> intercells, int sgIdx, int intersectingInt)
-        {
-            intersectCells = intercells;
-            intersectType = cg.GroupType;
-            intersectedUnitValues = new List<int>() { intersectingInt };
-            cellGroupIndex = cg.Index;
-            subgridIndex = sgIdx;
+            elimCells = prohibitCells;
+            intersectValue = intersectingInt;
+            subgrid = cg;
         }
 
         public override string ToString()
         {
-            return intersectCells.ToString() + " " + intersectedUnitValues.ToString();
+            return intersectCells.ToString() + " " + intersectValue.ToString();
         }
     }
 }

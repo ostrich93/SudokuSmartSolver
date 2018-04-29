@@ -13,90 +13,37 @@ namespace SudokuPuzzleSolver.contexts
         protected override Percepts percept => Percepts.SubgroupExclusion;
         public override bool GetContext(out List<SGUnitIntersectKey> sgintersections)
         {
-            List<CellGroup> potentialSGs = puzzle.GetOpenSubgrids().Where(o => o.GetOpenCellCount() > 1).ToList();
-            if (potentialSGs == null || potentialSGs.Count == 0)
+            List<SGUnitIntersectKey> sgIntersections = new List<SGUnitIntersectKey>();
+            for (int i = 1; i < 10; i++)
             {
-                sgintersections = null;
-                return false;
-            }
-            List<CellGroup> potentialRows = GetAssociatedPotentialGroups(UnitType.row, potentialSGs);
-            List<CellGroup> potentialColumns = GetAssociatedPotentialGroups(UnitType.column, potentialSGs);
-
-            List<SGUnitIntersectKey> subgroupIntersections = new List<SGUnitIntersectKey>();
-            var puzzleWideFills = SudokuPuzzle.sudokuDomain.Where(f => puzzle.GetRemainingInstances(f) > 1);
-            if (puzzleWideFills != null && puzzleWideFills.Count() > 0) {
-                foreach(int sd in puzzleWideFills)
+                List<CellGroup> subgridCands = puzzle.GetOpenSubgrids().Where(osg => osg.GetRemainingFills().Contains(i)).ToList();
+                if (subgridCands != null && subgridCands.Count > 0)
                 {
-                    List<CellGroup> candSGs = potentialSGs.Where(i => i.GetRemainingFills().Contains(sd)).ToList();
-                    foreach (CellGroup cancan in candSGs ?? new List<CellGroup>())
+                    foreach (CellGroup sgrid in subgridCands)
                     {
-                        List<SGUnitIntersectKey> rowIntersects = GetProperSGUIntersects(potentialRows, sd, cancan);
-                        if (rowIntersects != null && rowIntersects.Count > 0)
-                            subgroupIntersections.AddRange(rowIntersects);
-                        List<SGUnitIntersectKey> columnIntersects = GetProperSGUIntersects(potentialColumns, sd, cancan);
-                        if (columnIntersects != null && columnIntersects.Count > 0)
-                            subgroupIntersections.AddRange(columnIntersects);
+                        List<SudokuCell> sgMems = sgrid.GetOpenMembers().Where(sgmem => sgmem.Possibilities.Contains(i)).ToList();
+                        if (sgMems != null && sgMems.Count > 0)
+                        {
+                            List<SudokuCell> sgExlclusivePossCells = sgMems.Where(sgc => SoloSGNs(sgc, i)).ToList();
+                            List<SudokuCell> nonExclusiveCells = sgMems.Where(sgc => !SoloSGNs(sgc, i)).ToList();
+                            if (sgExlclusivePossCells.Count >= 1)
+                            {
+                                //create new SGUIntersectKey and add to list
+                                sgIntersections.Add(new SGUnitIntersectKey(sgrid, sgExlclusivePossCells, nonExclusiveCells, i));
+                            }
+                        }
                     }
                 }
             }
-            sgintersections = subgroupIntersections;
-            return (sgintersections != null && sgintersections.Count > 0);
+            sgintersections = sgIntersections.Where(a => a.elimCells != null && a.elimCells.Count > 0).ToList();
+            return sgintersections != null && sgintersections.Count > 0;
         }
 
-        private List<SGUnitIntersectKey> GetProperSGUIntersects(List<CellGroup> associatedGs, int target, CellGroup subGrid)
+        private bool SoloSGNs(SudokuCell scell, int fN)
         {
-            if (associatedGs == null || associatedGs.Count == 0)
-                return null;
-            List<SGUnitIntersectKey> sgsterSects = new List<SGUnitIntersectKey>();
-            foreach (CellGroup assoc in associatedGs)
-            {
-                List<SudokuCell> excCells = HelpGetProperCells(assoc, target, subGrid);
-                if (excCells != null)
-                {
-                    SGUnitIntersectKey sGUnitIntersect = new SGUnitIntersectKey(assoc, excCells, subGrid.Index, target);
-                    sgsterSects.Add(sGUnitIntersect);
-                }
-            }
-            return sgsterSects;
+            return (scell.GetNeighborsWithPossibility(fN, UnitType.row).Select(s => s.sgNumber).Distinct().Count() == 1) || (scell.GetNeighborsWithPossibility(fN, UnitType.column).Select(s => s.sgNumber).Distinct().Count() == 1);
         }
 
-        private List<SudokuCell> HelpGetProperCells(CellGroup associatedG, int target, CellGroup subgrid)
-        {
-            List<SudokuCell> helpVar = associatedG.GetCellsWithPossibility(target);
-            if (helpVar == null || helpVar.Count == 0)
-            {
-                return null;
-            }
-            List<SudokuCell> exclusionCells = new List<SudokuCell>();
-            int intersectCount = helpVar.Select(tcg => tcg).Where(ab => ab.sgNumber == subgrid.Index).Count();
-            if (intersectCount == helpVar.Count)
-                exclusionCells = helpVar;
-            return exclusionCells;
-        }
-
-        private List<CellGroup> GetAssociatedPotentialGroups(UnitType unitType, List<CellGroup> posg)
-        {
-            List<int> sgInds = posg.Select(q => q.Index).ToList();
-            if (sgInds == null || sgInds.Count < 1)
-                return null;
-            switch (unitType)
-            {
-                case UnitType.row:
-                    List<int> rinds = sgInds.Select(n => n).Where(m => SudokuCellExtensions.DeriveRowIndicesFromSG(m) != null && SudokuCellExtensions.DeriveRowIndicesFromSG(m).Count > 0).ToList();
-                    if (rinds != null && rinds.Count > 0)
-                        return puzzle.GetOpenRows().Select(r => r).Where(s => s != null && s.GetOpenCellCount() > 1 && rinds.Contains(s.Index)).ToList();
-                    break;
-                case UnitType.column:
-                    List<int> colinds = sgInds.Select(s => s).Where(t => SudokuCellExtensions.DeriveColIndicesFromSG(t) != null && SudokuCellExtensions.DeriveColIndicesFromSG(t).Count > 0).ToList();
-                    if (colinds != null && colinds.Count > 0)
-                        return puzzle.GetOpenColumns().Select(c => c).Where(d => d != null && d.GetOpenCellCount() > 1 && colinds.Contains(d.Index)).ToList();
-                    break;
-                case UnitType.subgrid:
-                    break;
-                default:
-                    break;
-            }
-            return null;
-        }
+        
     }
 }
